@@ -32,6 +32,8 @@ export SHOP_ACCESS_TOKEN="$INPUT_ACCESS_TOKEN"
 # Optional, these are used
 [[ -n "$INPUT_LHCI_MIN_SCORE_PERFORMANCE" ]]   && export LHCI_MIN_SCORE_PERFORMANCE="$INPUT_LHCI_MIN_SCORE_PERFORMANCE"
 [[ -n "$INPUT_LHCI_MIN_SCORE_ACCESSIBILITY" ]] && export LHCI_MIN_SCORE_ACCESSIBILITY="$INPUT_LHCI_MIN_SCORE_ACCESSIBILITY"
+[[ -n "$INPUT_LHCI_MIN_SCORE_BEST_PRACTICES" ]] && export INPUT_LHCI_MIN_SCORE_BEST_PRACTICES="$INPUT_INPUT_LHCI_MIN_SCORE_BEST_PRACTICES"
+[[ -n "$INPUT_LHCI_MIN_SCORE_SEO" ]] && export LHCI_MIN_SCORE_SEO="$INPUT_LHCI_MIN_SCORE_SEO"
 
 # Add global node bin to PATH (from the Dockerfile)
 export PATH="$PATH:$npm_config_prefix/bin"
@@ -188,6 +190,8 @@ fi
 query_string="?preview_theme_id=${preview_id}&_fd=0&pb=0"
 min_score_performance="${LHCI_MIN_SCORE_PERFORMANCE:-0.6}"
 min_score_accessibility="${LHCI_MIN_SCORE_ACCESSIBILITY:-0.9}"
+min_score_best_practices="${LHCI_MIN_SCORE_BEST_PRACTICES:-1.0}"
+min_score_seo="${LHCI_MIN_SCORE_SEO:-0.9}"
 
 cat <<- EOF > lighthouserc.yml
 ci:
@@ -196,6 +200,7 @@ ci:
       - "$host/$query_string"
       - "$host/products/$product_handle$query_string"
       - "$host/collections/$collection_handle$query_string"
+      - "$host/cart"
     puppeteerScript: './setPreviewCookies.js'
     puppeteerLaunchOptions:
       args:
@@ -203,6 +208,10 @@ ci:
         - "--disable-setuid-sandbox"
         - "--disable-dev-shm-usage"
         - "--disable-gpu"
+    numberOfRuns: 5
+    settings:
+      chromeFlags:
+        - '--incognito'
   upload:
     target: temporary-public-storage
   assert:
@@ -214,6 +223,14 @@ ci:
       "categories:accessibility":
         - error
         - minScore: $min_score_accessibility
+          aggregationMethod: median-run
+      "categories:best_practices":
+        - error
+        - minScore: $min_score_best_practices
+          aggregationMethod: median-run
+      "categories:seo":
+        - error
+        - minScore: $min_score_seo
           aggregationMethod: median-run
 EOF
 
