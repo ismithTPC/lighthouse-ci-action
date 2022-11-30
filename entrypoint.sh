@@ -190,7 +190,7 @@ fi
 query_string="?preview_theme_id=${preview_id}&_fd=0&pb=0"
 min_score_performance="${LHCI_MIN_SCORE_PERFORMANCE:-0.6}"
 min_score_accessibility="${LHCI_MIN_SCORE_ACCESSIBILITY:-0.9}"
-min_score_best_practices="${LHCI_MIN_SCORE_BEST_PRACTICES:-1.0}"
+min_score_best_practices="${LHCI_MIN_SCORE_BEST_PRACTICES:-0.9}"
 min_score_seo="${LHCI_MIN_SCORE_SEO:-0.9}"
 
 cat <<- EOF > lighthouserc.yml
@@ -224,7 +224,7 @@ ci:
         - error
         - minScore: $min_score_accessibility
           aggregationMethod: median-run
-      "categories:best_practices":
+      "categories:best-practices":
         - error
         - minScore: $min_score_best_practices
           aggregationMethod: median-run
